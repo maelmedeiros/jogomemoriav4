@@ -28,8 +28,8 @@ h1 { color: #333; }
 <body>
 <h1>Jogo da Memória Colormaq</h1>
 <div id="controls">
-  <div id="s-container">
-    <p>Movimentos restantes: <span id="s">16</span></p>
+  <div id="moves-container">
+    <p>Movimentos restantes: <span id="moves">10</span></p>
     <div id="progress-bar"><div id="progress"></div></div>
   </div>
   <button id="restartBtn">Reiniciar</button>
@@ -39,14 +39,15 @@ h1 { color: #333; }
 
 <script>
 const board = document.getElementById("gameBoard");
-const sSpan = document.getElementById("s");
+const movesSpan = document.getElementById("moves");
 const progress = document.getElementById("progress");
 const message = document.getElementById("message");
 const restartBtn = document.getElementById("restartBtn");
 
 let hasFlipped = false, lockBoard = false, firstCard, secondCard;
-let moves = 16, matches = 0;
+let moves = 10, matches = 0;
 const totalPairs = 8;
+movesSpan.textContent = moves;
 
 // Links diretos do GitHub
 const images = [
@@ -62,7 +63,7 @@ const images = [
 
 function startGame(){
   hasFlipped = false; lockBoard = false; firstCard = null; secondCard = null;
-  moves = 16; matches = 0; sSpan.textContent = moves; message.textContent = "";
+  moves = 10; matches = 0; movesSpan.textContent = moves; message.textContent = "";
   progress.style.width = "100%";
 
   board.innerHTML = "";
@@ -111,8 +112,8 @@ function resetBoard(){ [hasFlipped, lockBoard] = [false, false]; [firstCard, sec
 
 function updateMoves(){
   moves--;
-  sSpan.textContent = moves;
-  progress.style.width = ((moves / 16) * 100) + "%"; // corrigido
+  movesSpan.textContent = moves;
+  progress.style.width = (moves*10)+"%";
   if(moves === 3){ message.textContent = "⚠️ Faltam 3 movimentos!"; }
   if(moves <= 0 && matches < totalPairs){ message.textContent = "❌ Não foi dessa vez!"; lockBoard = true; }
 }
