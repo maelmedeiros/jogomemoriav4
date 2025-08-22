@@ -45,7 +45,7 @@ const message = document.getElementById("message");
 const restartBtn = document.getElementById("restartBtn");
 
 let hasFlipped = false, lockBoard = false, firstCard, secondCard;
-let moves = 10, matches = 0;
+let moves = 16, matches = 0;
 const totalPairs = 8;
 movesSpan.textContent = moves;
 
@@ -113,7 +113,7 @@ function resetBoard(){ [hasFlipped, lockBoard] = [false, false]; [firstCard, sec
 function updateMoves(){
   moves--;
   movesSpan.textContent = moves;
-  progress.style.width = (moves*16)+"%";
+  progress.style.width = (moves*10)+"%";
   if(moves === 3){ message.textContent = "⚠️ Faltam 3 movimentos!"; }
   if(moves <= 0 && matches < totalPairs){ message.textContent = "❌ Não foi dessa vez!"; lockBoard = true; }
 }
@@ -123,6 +123,7 @@ startGame();
 </script>
 </body>
 </html>
+
 
 
 
