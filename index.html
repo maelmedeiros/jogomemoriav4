@@ -47,7 +47,6 @@ const restartBtn = document.getElementById("restartBtn");
 let hasFlipped = false, lockBoard = false, firstCard, secondCard;
 let moves = 16, matches = 0;
 const totalPairs = 8;
-movesSpan.textContent = moves;
 
 // Links diretos do GitHub
 const images = [
@@ -63,7 +62,7 @@ const images = [
 
 function startGame(){
   hasFlipped = false; lockBoard = false; firstCard = null; secondCard = null;
-  moves = 16; matches = 0; movesSpan.textContent = moves; message.textContent = "";
+  moves = 16; matches = 0; sSpan.textContent = moves; message.textContent = "";
   progress.style.width = "100%";
 
   board.innerHTML = "";
@@ -112,8 +111,8 @@ function resetBoard(){ [hasFlipped, lockBoard] = [false, false]; [firstCard, sec
 
 function updateMoves(){
   moves--;
-  movesSpan.textContent = moves;
-  progress.style.width = (moves*10)+"%";
+  sSpan.textContent = moves;
+  progress.style.width = ((moves / 16) * 100) + "%"; // corrigido
   if(moves === 3){ message.textContent = "⚠️ Faltam 3 movimentos!"; }
   if(moves <= 0 && matches < totalPairs){ message.textContent = "❌ Não foi dessa vez!"; lockBoard = true; }
 }
@@ -123,8 +122,3 @@ startGame();
 </script>
 </body>
 </html>
-
-
-
-
-
