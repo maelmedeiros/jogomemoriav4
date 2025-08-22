@@ -113,7 +113,7 @@ function resetBoard(){ [hasFlipped, lockBoard] = [false, false]; [firstCard, sec
 function updateMoves(){
   moves--;
   movesSpan.textContent = moves;
-  progress.style.width = (moves*10)+"%";
+  progress.style.width = (moves*16)+"%";
   if(moves === 3){ message.textContent = "⚠️ Faltam 3 movimentos!"; }
   if(moves <= 0 && matches < totalPairs){ message.textContent = "❌ Não foi dessa vez!"; lockBoard = true; }
 }
@@ -123,5 +123,6 @@ startGame();
 </script>
 </body>
 </html>
+
 
 
