@@ -1,125 +1,187 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jogo da Memória Colormaq</title>
-<style>
-body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f9; margin: 0; padding: 20px; }
-h1 { color: #333; }
-#controls { margin: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-#moves-container { width: 100%; max-width: 400px; }
-#progress-bar { width: 100%; height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; }
-#progress { height: 100%; width: 100%; background: #2ecc71; transition: width 0.3s; }
-#gameBoard { display: grid; gap: 10px; margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
-.card { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 10px; }
-.card.flip { transform: rotateY(180deg); }
-.front, .back { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; border-radius: 10px; }
-.front { background: #3498db; color: white; font-size: 24px; }
-.back { transform: rotateY(180deg); background: white; border: 2px solid #3498db; overflow: hidden; }
-.back img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-#message { margin-top: 15px; font-size: 20px; font-weight: bold; color: #e74c3c; min-height: 24px; }
-#restartBtn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 8px; background: #38bdf8; color: #001018; cursor: pointer; }
-@media (min-width: 320px) { #gameBoard { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 480px) { #gameBoard { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 768px) { #gameBoard { grid-template-columns: repeat(4, 1fr); } }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Memória</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin: 20px 0;
+    }
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background: #1e90ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .flipped img {
+      display: block;
+    }
+    .flipped {
+      background: #fff;
+    }
+    #message {
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #progress-container {
+      width: 80%;
+      background: #ddd;
+      border-radius: 5px;
+      margin: 10px auto;
+      height: 20px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: #1e90ff;
+      transition: width 0.3s;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #1e90ff;
+      color: white;
+    }
+    @media (max-width: 600px) {
+      #game-board {
+        grid-template-columns: repeat(3, 80px);
+        grid-gap: 8px;
+      }
+      .card {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Jogo da Memória Colormaq</h1>
-<div id="controls">
-  <div id="moves-container">
-    <p>Movimentos restantes: <span id="moves">10</span></p>
-    <div id="progress-bar"><div id="progress"></div></div>
+  <h1>Jogo da Memória</h1>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
   </div>
-  <button id="restartBtn">Reiniciar</button>
-</div>
-<div id="gameBoard"></div>
-<p id="message"></p>
+  <div id="message">Movimentos restantes: 10</div>
+  <div id="game-board"></div>
+  <button onclick="startGame()">Reiniciar</button>
 
-<script>
-const board = document.getElementById("gameBoard");
-const movesSpan = document.getElementById("moves");
-const progress = document.getElementById("progress");
-const message = document.getElementById("message");
-const restartBtn = document.getElementById("restartBtn");
+  <script>
+    const images = [
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenbr.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenpr.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lca%2014.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs10kgtopo.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs20kg.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20elec.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20pro.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/purpremium.png"
+    ];
 
-let hasFlipped = false, lockBoard = false, firstCard, secondCard;
-let moves = 10, matches = 0;
-const totalPairs = 8;
-movesSpan.textContent = moves;
+    let firstCard, secondCard;
+    let lockBoard = false;
+    let moves = 0;
+    let totalMoves = 10;
 
-// Links diretos do GitHub
-const images = [
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenbr.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenpr.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lca%2014.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs10kgtopo.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs20kg.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20elec.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20pro.png",
-  "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/purpremium.png"
-];
+    function startGame() {
+      const board = document.getElementById("game-board");
+      board.innerHTML = "";
+      moves = 0;
+      document.getElementById("message").innerText = `Movimentos restantes: ${totalMoves}`;
+      updateProgress();
 
-function startGame(){
-  hasFlipped = false; lockBoard = false; firstCard = null; secondCard = null;
-  moves = 10; matches = 0; movesSpan.textContent = moves; message.textContent = "";
-  progress.style.width = "100%";
+      let cardImages = [...images, ...images];
+      cardImages.sort(() => 0.5 - Math.random());
 
-  board.innerHTML = "";
-  let cardValues = [...images, ...images].sort(() => Math.random() - 0.5);
-  cardValues.forEach(url => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.innerHTML = '<div class="front"></div><div class="back"><img src="' + url + '" alt="img"></div>';
-    board.appendChild(card);
-    card.addEventListener("click", flipCard);
-  });
-}
+      cardImages.forEach(img => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `<img src="${img}" alt="carta">`;
+        card.addEventListener("click", flipCard);
+        board.appendChild(card);
+      });
+    }
 
-function flipCard(){
-  if(lockBoard || this === firstCard) return;
-  if(moves <= 0) return;
+    function flipCard() {
+      if (lockBoard || this.classList.contains("flipped")) return;
 
-  this.classList.add("flip");
-  if(!hasFlipped){ hasFlipped = true; firstCard = this; return; }
-  secondCard = this;
-  checkMatch();
-}
+      this.classList.add("flipped");
+      if (!firstCard) {
+        firstCard = this;
+        return;
+      }
 
-function checkMatch(){
-  const isMatch = firstCard.querySelector("img").src === secondCard.querySelector("img").src;
-  if(isMatch){
-    disableCards();
-    matches++;
-    if(matches === totalPairs){ message.textContent = "🎉 Parabéns, você venceu!"; }
-  } else { unflipCards(); }
-  updateMoves();
-}
+      secondCard = this;
+      checkMatch();
+    }
 
-function disableCards(){
-  firstCard.removeEventListener("click", flipCard);
-  secondCard.removeEventListener("click", flipCard);
-  resetBoard();
-}
+    function checkMatch() {
+      let isMatch = firstCard.innerHTML === secondCard.innerHTML;
+      if (isMatch) {
+        resetBoard();
+      } else {
+        lockBoard = true;
+        setTimeout(() => {
+          firstCard.classList.remove("flipped");
+          secondCard.classList.remove("flipped");
+          resetBoard();
+        }, 1000);
+      }
 
-function unflipCards(){
-  lockBoard = true;
-  setTimeout(() => { firstCard.classList.remove("flip"); secondCard.classList.remove("flip"); resetBoard(); }, 1000);
-}
+      moves++;
+      let remaining = totalMoves - moves;
+      document.getElementById("message").innerText = remaining > 0
+        ? `Movimentos restantes: ${remaining}`
+        : "Não foi dessa vez!";
+      updateProgress();
 
-function resetBoard(){ [hasFlipped, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
+      if (remaining === 0) {
+        lockBoard = true;
+      }
+    }
 
-function updateMoves(){
-  moves--;
-  movesSpan.textContent = moves;
-  progress.style.width = (moves*10)+"%";
-  if(moves === 3){ message.textContent = "⚠️ Faltam 3 movimentos!"; }
-  if(moves <= 0 && matches < totalPairs){ message.textContent = "❌ Não foi dessa vez!"; lockBoard = true; }
-}
+    function resetBoard() {
+      [firstCard, secondCard, lockBoard] = [null, null, false];
+    }
 
-restartBtn.addEventListener("click", startGame);
-startGame();
-</script>
+    function updateProgress() {
+      const progress = (moves / totalMoves) * 100;
+      document.getElementById("progress-bar").style.width = progress + "%";
+    }
+
+    startGame();
+  </script>
 </body>
 </html>
