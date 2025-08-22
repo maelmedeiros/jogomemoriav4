@@ -8,25 +8,25 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f4f4f9;
       margin: 0;
       padding: 20px;
+      background: #f4f4f4;
     }
     h1 {
       margin-bottom: 10px;
     }
     #game-board {
       display: grid;
-      grid-template-columns: repeat(4, 120px);
+      grid-template-columns: repeat(4, 100px);
       grid-gap: 10px;
       justify-content: center;
       margin: 20px auto;
     }
     .card {
-      width: 120px;
-      height: 120px;
-      background: #2196f3;
-      border-radius: 10px;
+      width: 100px;
+      height: 100px;
+      background: #3498db;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -36,44 +36,54 @@
     .card img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
       display: none;
     }
-    .flipped img {
+    .card.flipped img {
       display: block;
     }
-    .flipped {
-      background: #fff;
-    }
-    #moves-container {
-      margin: 15px 0;
+    #mensagem {
+      margin-top: 15px;
       font-size: 18px;
+      font-weight: bold;
     }
-    #progress-bar {
-      width: 100%;
-      max-width: 400px;
+    #barra-progresso {
+      width: 80%;
       height: 20px;
+      margin: 10px auto;
       background: #ddd;
       border-radius: 10px;
       overflow: hidden;
-      margin: 10px auto;
     }
-    #progress {
+    #progresso {
       height: 100%;
-      width: 100%;
-      background: #4caf50;
+      width: 0%;
+      background: #2ecc71;
+    }
+    #reiniciar {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #reiniciar:hover {
+      background: #c0392b;
     }
   </style>
 </head>
 <body>
+
   <h1>Jogo da Memória</h1>
-  <div id="moves-container">Movimentos restantes: <span id="moves">10</span></div>
-  <div id="progress-bar"><div id="progress"></div></div>
+  <div id="barra-progresso"><div id="progresso"></div></div>
+  <p id="mensagem">Você tem 16 movimentos!</p>
   <div id="game-board"></div>
-  <p id="message"></p>
+  <button id="reiniciar">🔄 Reiniciar</button>
 
   <script>
-    const images = [
+    const imagens = [
       "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/cenbr.png",
       "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/cenpr.png",
       "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/lca%2014.png",
@@ -84,80 +94,79 @@
       "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/purpremium.png"
     ];
 
-    const gameBoard = document.getElementById("game-board");
-    const movesDisplay = document.getElementById("moves");
-    const message = document.getElementById("message");
-    const progress = document.getElementById("progress");
+    let movimentos = 0;
+    let limiteMovimentos = 16;
+    let totalMovimentos = 0;
+    let cartaVirada = null;
+    let bloqueio = false;
 
-    let cards = [];
-    let flippedCards = [];
-    let matchedCards = 0;
-    let movesLeft = 16;
+    const tabuleiro = document.getElementById("game-board");
+    const mensagem = document.getElementById("mensagem");
+    const progresso = document.getElementById("progresso");
+    const reiniciarBtn = document.getElementById("reiniciar");
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
+    function iniciarJogo() {
+      tabuleiro.innerHTML = "";
+      movimentos = 0;
+      totalMovimentos = 0;
+      cartaVirada = null;
+      bloqueio = false;
+      progresso.style.width = "0%";
+      mensagem.textContent = `Você tem ${limiteMovimentos} movimentos!`;
 
-    function initGame() {
-      const doubled = [...images, ...images];
-      cards = shuffle(doubled);
-      gameBoard.innerHTML = "";
-      matchedCards = 0;
-      movesLeft = 10;
-      movesDisplay.textContent = movesLeft;
-      progress.style.width = "100%";
-      message.textContent = "";
+      let cartas = [...imagens, ...imagens];
+      cartas.sort(() => 0.5 - Math.random());
 
-      cards.forEach(src => {
+      cartas.forEach(src => {
         const card = document.createElement("div");
         card.classList.add("card");
         const img = document.createElement("img");
         img.src = src;
         card.appendChild(img);
-        card.addEventListener("click", () => flipCard(card, src));
-        gameBoard.appendChild(card);
+        card.addEventListener("click", () => virarCarta(card, src));
+        tabuleiro.appendChild(card);
       });
     }
 
-    function flipCard(card, src) {
-      if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
-        card.classList.add("flipped");
-        flippedCards.push({ card, src });
+    function virarCarta(card, src) {
+      if (bloqueio || card.classList.contains("flipped")) return;
+      card.classList.add("flipped");
+      totalMovimentos++;
+      atualizarProgresso();
 
-        if (flippedCards.length === 2) {
-          checkMatch();
-        }
-      }
-    }
-
-    function checkMatch() {
-      const [first, second] = flippedCards;
-      if (first.src === second.src) {
-        matchedCards += 2;
-        flippedCards = [];
-        if (matchedCards === cards.length) {
-          message.textContent = "🎉 Você venceu!";
-        }
+      if (!cartaVirada) {
+        cartaVirada = { card, src };
       } else {
-        setTimeout(() => {
-          first.card.classList.remove("flipped");
-          second.card.classList.remove("flipped");
-          flippedCards = [];
-        }, 800);
-        movesLeft--;
-        movesDisplay.textContent = movesLeft;
-        progress.style.width = `${(movesLeft / 10) * 100}%`;
-
-        if (movesLeft === 0) {
-          message.textContent = "Não foi dessa vez!";
-          document.querySelectorAll(".card").forEach(c => c.style.pointerEvents = "none");
-        } else if (movesLeft <= 3) {
-          message.textContent = `⚠️ Faltam apenas ${movesLeft} movimentos!`;
+        if (cartaVirada.src === src) {
+          cartaVirada = null;
+        } else {
+          bloqueio = true;
+          setTimeout(() => {
+            card.classList.remove("flipped");
+            cartaVirada.card.classList.remove("flipped");
+            cartaVirada = null;
+            bloqueio = false;
+          }, 1000);
         }
+      }
+
+      if (totalMovimentos >= limiteMovimentos) {
+        mensagem.textContent = "Não foi dessa vez!";
+        bloqueio = true;
+      } else {
+        let restantes = limiteMovimentos - totalMovimentos;
+        mensagem.textContent = `Faltam ${restantes} movimentos.`;
       }
     }
 
-    initGame();
+    function atualizarProgresso() {
+      let progressoAtual = (totalMovimentos / limiteMovimentos) * 100;
+      progresso.style.width = `${progressoAtual}%`;
+    }
+
+    reiniciarBtn.addEventListener("click", iniciarJogo);
+
+    iniciarJogo();
   </script>
 </body>
 </html>
