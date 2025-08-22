@@ -29,7 +29,7 @@ h1 { color: #333; }
 <h1>Jogo da Memória Colormaq</h1>
 <div id="controls">
   <div id="moves-container">
-    <p>Movimentos restantes: <span id="moves">10</span></p>
+    <p>Movimentos restantes: <span id="moves">16</span></p>
     <div id="progress-bar"><div id="progress"></div></div>
   </div>
   <button id="restartBtn">Reiniciar</button>
@@ -63,7 +63,7 @@ const images = [
 
 function startGame(){
   hasFlipped = false; lockBoard = false; firstCard = null; secondCard = null;
-  moves = 10; matches = 0; movesSpan.textContent = moves; message.textContent = "";
+  moves = 16; matches = 0; movesSpan.textContent = moves; message.textContent = "";
   progress.style.width = "100%";
 
   board.innerHTML = "";
@@ -123,3 +123,4 @@ startGame();
 </script>
 </body>
 </html>
+
