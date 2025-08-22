@@ -8,38 +8,35 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f4f4f4;
+      background: #f4f4f9;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     h1 {
-      margin: 20px 0;
+      margin-bottom: 10px;
     }
     #game-board {
       display: grid;
-      grid-template-columns: repeat(4, 100px);
+      grid-template-columns: repeat(4, 120px);
       grid-gap: 10px;
       justify-content: center;
       margin: 20px auto;
     }
     .card {
-      width: 100px;
-      height: 100px;
-      background: #1e90ff;
+      width: 120px;
+      height: 120px;
+      background: #2196f3;
+      border-radius: 10px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-      border-radius: 8px;
-      position: relative;
       overflow: hidden;
     }
     .card img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: none;
     }
     .flipped img {
@@ -48,140 +45,119 @@
     .flipped {
       background: #fff;
     }
-    #message {
+    #moves-container {
       margin: 15px 0;
       font-size: 18px;
-      font-weight: bold;
-    }
-    #progress-container {
-      width: 80%;
-      background: #ddd;
-      border-radius: 5px;
-      margin: 10px auto;
-      height: 20px;
-      overflow: hidden;
     }
     #progress-bar {
+      width: 100%;
+      max-width: 400px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px auto;
+    }
+    #progress {
       height: 100%;
-      width: 0;
-      background: #1e90ff;
-      transition: width 0.3s;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background: #1e90ff;
-      color: white;
-    }
-    @media (max-width: 600px) {
-      #game-board {
-        grid-template-columns: repeat(3, 80px);
-        grid-gap: 8px;
-      }
-      .card {
-        width: 80px;
-        height: 80px;
-      }
+      width: 100%;
+      background: #4caf50;
     }
   </style>
 </head>
 <body>
   <h1>Jogo da Memória</h1>
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-  </div>
-  <div id="message">Movimentos restantes: 10</div>
+  <div id="moves-container">Movimentos restantes: <span id="moves">10</span></div>
+  <div id="progress-bar"><div id="progress"></div></div>
   <div id="game-board"></div>
-  <button onclick="startGame()">Reiniciar</button>
+  <p id="message"></p>
 
   <script>
     const images = [
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenbr.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/cenpr.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lca%2014.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs10kgtopo.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/lcs20kg.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20elec.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/pur%20pro.png",
-      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/refs/heads/main/purpremium.png"
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/cenbr.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/cenpr.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/lca%2014.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/lcs10kgtopo.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/lcs20kg.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/pur%20elec.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/pur%20pro.png",
+      "https://raw.githubusercontent.com/maelmedeiros/jogomemoriav4/main/purpremium.png"
     ];
 
-    let firstCard, secondCard;
-    let lockBoard = false;
-    let moves = 0;
-    let totalMoves = 10;
+    const gameBoard = document.getElementById("game-board");
+    const movesDisplay = document.getElementById("moves");
+    const message = document.getElementById("message");
+    const progress = document.getElementById("progress");
 
-    function startGame() {
-      const board = document.getElementById("game-board");
-      board.innerHTML = "";
-      moves = 0;
-      document.getElementById("message").innerText = `Movimentos restantes: ${totalMoves}`;
-      updateProgress();
+    let cards = [];
+    let flippedCards = [];
+    let matchedCards = 0;
+    let movesLeft = 10;
 
-      let cardImages = [...images, ...images];
-      cardImages.sort(() => 0.5 - Math.random());
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
-      cardImages.forEach(img => {
+    function initGame() {
+      const doubled = [...images, ...images];
+      cards = shuffle(doubled);
+      gameBoard.innerHTML = "";
+      matchedCards = 0;
+      movesLeft = 10;
+      movesDisplay.textContent = movesLeft;
+      progress.style.width = "100%";
+      message.textContent = "";
+
+      cards.forEach(src => {
         const card = document.createElement("div");
         card.classList.add("card");
-        card.innerHTML = `<img src="${img}" alt="carta">`;
-        card.addEventListener("click", flipCard);
-        board.appendChild(card);
+        const img = document.createElement("img");
+        img.src = src;
+        card.appendChild(img);
+        card.addEventListener("click", () => flipCard(card, src));
+        gameBoard.appendChild(card);
       });
     }
 
-    function flipCard() {
-      if (lockBoard || this.classList.contains("flipped")) return;
+    function flipCard(card, src) {
+      if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
+        card.classList.add("flipped");
+        flippedCards.push({ card, src });
 
-      this.classList.add("flipped");
-      if (!firstCard) {
-        firstCard = this;
-        return;
+        if (flippedCards.length === 2) {
+          checkMatch();
+        }
       }
-
-      secondCard = this;
-      checkMatch();
     }
 
     function checkMatch() {
-      let isMatch = firstCard.innerHTML === secondCard.innerHTML;
-      if (isMatch) {
-        resetBoard();
+      const [first, second] = flippedCards;
+      if (first.src === second.src) {
+        matchedCards += 2;
+        flippedCards = [];
+        if (matchedCards === cards.length) {
+          message.textContent = "🎉 Você venceu!";
+        }
       } else {
-        lockBoard = true;
         setTimeout(() => {
-          firstCard.classList.remove("flipped");
-          secondCard.classList.remove("flipped");
-          resetBoard();
-        }, 1000);
+          first.card.classList.remove("flipped");
+          second.card.classList.remove("flipped");
+          flippedCards = [];
+        }, 800);
+        movesLeft--;
+        movesDisplay.textContent = movesLeft;
+        progress.style.width = `${(movesLeft / 10) * 100}%`;
+
+        if (movesLeft === 0) {
+          message.textContent = "Não foi dessa vez!";
+          document.querySelectorAll(".card").forEach(c => c.style.pointerEvents = "none");
+        } else if (movesLeft <= 3) {
+          message.textContent = `⚠️ Faltam apenas ${movesLeft} movimentos!`;
+        }
       }
-
-      moves++;
-      let remaining = totalMoves - moves;
-      document.getElementById("message").innerText = remaining > 0
-        ? `Movimentos restantes: ${remaining}`
-        : "Não foi dessa vez!";
-      updateProgress();
-
-      if (remaining === 0) {
-        lockBoard = true;
-      }
     }
 
-    function resetBoard() {
-      [firstCard, secondCard, lockBoard] = [null, null, false];
-    }
-
-    function updateProgress() {
-      const progress = (moves / totalMoves) * 100;
-      document.getElementById("progress-bar").style.width = progress + "%";
-    }
-
-    startGame();
+    initGame();
   </script>
 </body>
 </html>
